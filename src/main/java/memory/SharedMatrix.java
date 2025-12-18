@@ -104,6 +104,8 @@ public class SharedMatrix {
 
     public VectorOrientation getOrientation() {
         // Done: return orientation
+        if(vectors == null || vectors[0]==null)
+            throw new IllegalStateException("Matrix is undefined");
         return vectors[0].getOrientation();
     }
 
