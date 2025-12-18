@@ -14,6 +14,45 @@ public class SharedMatrix {
         loadRowMajor(matrix);
     }
 
+    //helper method to check if this==other
+    @Override public boolean equals(Object other){
+        if(this == other) return true;
+        else { 
+            if(other == null || !(this.getClass() == other.getClass()) ) 
+                return false;
+            SharedMatrix otherMatrix = (SharedMatrix) other;
+            for (int index = 0; index < otherMatrix.length(); index++) {
+                if(!this.get(index).equals(otherMatrix.get(index)))
+                    return false;
+            }
+            return true;
+        }
+    }
+
+    /**helper method to print matrix
+    * vector output will change based on its orientation
+    * {1,2,3} -> |1||4|  / |1 2 3|
+    * {4,5,6}    |2||5|    |4 5 6|
+    *            |3||6|
+    * 
+    */
+    public String toString(){
+        String str="";
+        if(this.getOrientation() == VectorOrientation.ROW_MAJOR){
+            for (int row = 0; row < vectors.length; row++) 
+                str+=vectors[row].toString()+"\n";
+        }
+        else {
+            for (int col = 0; col < vectors.length; col++) {
+                for (int row = 0; row < vectors[0].length(); row++) {
+                    str+="|"+this.get(row).get(col)+"|";
+                }
+                str+="\n";
+            }
+        }
+        return str;
+    }
+
     public void loadRowMajor(double[][] matrix) {
     // Done: replace internal data with new row-major matrix
         if(matrix==null) throw new IllegalArgumentException("Input matrix cannot be null");
