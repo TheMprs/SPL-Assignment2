@@ -33,13 +33,15 @@ public class LinearAlgebraEngine {
         if(leftMatrix == null || rightMatrix == null){
             throw new NullPointerException("Matrices not loaded");
         }
+         if(leftMatrix.getOrientation() != rightMatrix.getOrientation()){
+            throw new UnsupportedOperationException("Matrices addition with different orientations not supported yet");
+        }
+        
         if(leftMatrix.length() != rightMatrix.length() || 
             leftMatrix.get(0).length() != rightMatrix.get(0).length()){
             throw new IllegalArgumentException("Matrices dimensions do not match for addition");
         }
-        if(leftMatrix.getOrientation() != rightMatrix.getOrientation()){
-            throw new UnsupportedOperationException("Matrices addition with different orientations not supported yet");
-        }
+       
         List<Runnable> tasks = new java.util.LinkedList<Runnable>();
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int index = i; //Capture index for lambda scope
