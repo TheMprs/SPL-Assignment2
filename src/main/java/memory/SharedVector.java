@@ -74,8 +74,8 @@ public class SharedVector {
 
     public void negate() {
         // Done: negate vector
-        for (Double entry : vector){
-            entry = -entry;
+        for (int i = 0; i < vector.length; i++) {
+            vector[i] = -vector[i];
         }
     }
 
@@ -110,4 +110,46 @@ public class SharedVector {
         //row * column is the same as dot product <row, column transposed>
         return dot(other);
     }
+
+
+@Override
+public boolean equals(Object other) {
+    
+    if (this == other) return true;
+    
+    if (other == null || getClass() != other.getClass()) return false;
+    
+    
+    SharedVector otherVector = (SharedVector) other;
+    if (orientation != otherVector.getOrientation() || length() != otherVector.length()){return false;}
+    for (int i = 0; i < vector.length; i++) {
+        if(vector[i]!= otherVector.get(i)){
+            return false;
+        }
+    }
+    return true;
+    }
+
+@Override 
+public String toString(){
+    StringBuilder sb = new StringBuilder();
+    if (orientation == VectorOrientation.ROW_MAJOR) {
+        sb.append("[ ");
+        for (int i = 0; i < vector.length; i++) {
+            sb.append(vector[i]);
+            if (i < vector.length - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]");
+    } else {
+        for (int i = 0; i < vector.length; i++) {
+            sb.append("| ").append(vector[i]).append(" |");
+            if (i < vector.length - 1) {
+                sb.append("\n");
+            }
+        }
+    }
+    return sb.toString();
+}
 }
