@@ -1,10 +1,12 @@
 public class TestUtils {
-    public static void check (String name, Boolean condition){
-        if (condition){
-            System.out.println(name+": PASS");
-        }
-        else{
-            System.out.println(name+ ": FAIL");
+    private static void checkObject(String testName, Object actual, Object expected) {
+        if (actual.equals(expected)) {
+            System.out.println("[PASS] " + testName);
+        } 
+        else {
+            System.out.println("[FAIL] " + testName);
+            System.out.println("   -> Expected: " + expected.toString());
+            System.out.println("   -> Actual:   " + actual.toString());
         }
     }
 }
