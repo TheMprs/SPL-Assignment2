@@ -9,6 +9,7 @@ public class TestSharedMatrix {
         System.out.println(" --- TESTING SHARED MATRIX FUNCTIONS ---");
         testMatrixRowMajorLoad();
         testMatrixColumnMajorLoad();
+        testMatrixRowMajorRead();
         testMatrixStats();
 
         TestUtils.summary();
@@ -40,13 +41,47 @@ public class TestSharedMatrix {
         SharedMatrix matrix = new SharedMatrix(); 
         matrix.loadColumnMajor(table);
 
-        double[] arr = {1.0,3.0};
+        double[] arr = {1.0,2.0};
         SharedVector firstCol = new SharedVector(arr,VectorOrientation.COLUMN_MAJOR);
 
         TestUtils.checkObject("Matrix Column Major Orientation", matrix.getOrientation(), VectorOrientation.COLUMN_MAJOR);
         TestUtils.checkObject("Matrix Column Major Content", matrix.get(0),firstCol);
     }
     
+    public static void testMatrixRowMajorRead() {
+        double[][] table = { {1,2}, {3,4} };
+        SharedMatrix rowMatrix = new SharedMatrix(); 
+        SharedMatrix colMatrix = new SharedMatrix(); 
+        
+        rowMatrix.loadRowMajor(table);
+        colMatrix.loadColumnMajor(table);
+
+        double[][] readRowTable = rowMatrix.readRowMajor();
+        double[][] readColTable = colMatrix.readRowMajor();
+
+        System.out.println("Row Major Matrix:");
+        System.out.print(rowMatrix);
+        System.out.println("Read Row Major Table:");
+        for (double[] row : readRowTable) {
+            System.out.print("[ ");
+            for (double val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println("]");
+        }
+
+        System.out.println("Column Major Matrix:");
+        System.out.print(colMatrix);
+        System.out.println("Read Column Major Table:");
+        for (double[] row : readColTable) {
+            System.out.print("[ ");
+            for (double val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println("]");
+        }
+    }
+
     public static void testMatrixStats(){
         double[][] table = {
             {1.0, 2.0, 3.0},
@@ -76,5 +111,6 @@ public class TestSharedMatrix {
             System.out.println("[PASS] Matrix Orientation Undefined");
         }
     }
+
 }
 

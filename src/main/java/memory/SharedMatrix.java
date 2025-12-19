@@ -43,9 +43,9 @@ public class SharedMatrix {
                 str+=vectors[row].toString()+"\n";
         }
         else {
-            for (int col = 0; col < vectors.length; col++) {
-                for (int row = 0; row < vectors[0].length(); row++) {
-                    str+="|"+this.get(row).get(col)+"|";
+            for (int row = 0; row < vectors.length; row++) {
+                for (int col = 0; col < vectors[0].length(); col++) {
+                    str+="|"+this.get(col).get(row)+"|";
                 }
                 str+="\n";
             }
@@ -71,20 +71,33 @@ public class SharedMatrix {
         vectors = new SharedVector[columns];
         
         for (int col = 0; col < columns; col++) {
-            double[] singleColData = new double[matrix.length];
+            double[] newRow = new double[matrix.length];
             for (int row = 0; row < matrix.length; row++) {
-                singleColData[row] = matrix[row][col];
+                newRow[row] = matrix[col][row];
             }
-            vectors[col] = new SharedVector(singleColData, VectorOrientation.COLUMN_MAJOR);
+            vectors[col] = new SharedVector(newRow, VectorOrientation.COLUMN_MAJOR);
         }
     }
 
     public double[][] readRowMajor() {
         // Done: return matrix contents as a row-major double[][]
-        double[][] matrixContents = new double[length()][vectors[0].length()];
-        for(int row=0;row< length();row++){
-            for(int column=0;column<vectors[0].length();column++){
-                matrixContents[row][column]=this.get(row).get(column);
+        double[][] matrixContents;
+        
+        //check orientation
+        if(getOrientation() == VectorOrientation.ROW_MAJOR){ //row major
+            matrixContents = new double[length()][vectors[0].length()];
+            for(int row=0;row< length();row++){
+                for(int col=0;col<vectors[0].length();col++){
+                    matrixContents[row][col]=this.get(row).get(col);
+                }
+            }
+        }
+        else{ //column major
+            matrixContents = new double[vectors[0].length()][length()];
+            for(int col=0;col< length();col++){
+                for(int row=0;row<vectors[0].length();row++){
+                    matrixContents[col][row]=this.get(row).get(col);
+                }
             }
         }
         return matrixContents;
