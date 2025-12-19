@@ -20,8 +20,14 @@ public class LinearAlgebraEngine {
     }
 
     public ComputationNode run(ComputationNode computationRoot) {
-        // TODO: resolve computation tree step by step until final matrix is produced
-        return null;
+        // Done: resolve computation tree step by step until final matrix is produced
+        if (computationRoot == null){
+            throw new NullPointerException("Computation tree root is null");
+        }
+        while(computationRoot.getNodeType() != ComputationNodeType.MATRIX){
+            loadAndCompute(computationRoot);
+        }
+        return computationRoot;
     }
 
     public void loadAndCompute(ComputationNode node) {
@@ -64,15 +70,12 @@ public class LinearAlgebraEngine {
                 throw new UnsupportedOperationException("Unsupported computation node type"); 
         }
         //executor.submitAll(tasks); //Uncomment when ready to run parallel tasks
-        
+        toResolve.resolve(leftMatrix.readRowMajor());
 
     }
     
     public List<Runnable> createAddTasks() {
         // Done: return tasks that perform row-wise addition
-        if(leftMatrix == null || rightMatrix == null){
-            throw new NullPointerException("Matrices not loaded");
-        }
          //Check dimensions to ensure they can be added
         if(leftMatrix.length() != rightMatrix.length() || 
             leftMatrix.get(0).length() != rightMatrix.get(0).length()){

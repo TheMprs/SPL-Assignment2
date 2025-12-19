@@ -99,7 +99,7 @@ public class SharedVector {
              }
             }
         else{//Matrix is oriented by rows
-            //Implement
+            throw new UnsupportedOperationException("Matrix is not in column major orientation");
         }
     }
 
