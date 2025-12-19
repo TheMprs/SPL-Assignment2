@@ -7,16 +7,19 @@ import memory.VectorOrientation;
 import parser.ComputationNode;
 import parser.ComputationNodeType;
 import scheduling.TiredExecutor;
+import scheduling.SequentialExecutor; //SEQUENTIAL FOR DEBUGGING
 
 public class LinearAlgebraEngine {
 
     private SharedMatrix leftMatrix = new SharedMatrix();
     private SharedMatrix rightMatrix = new SharedMatrix();
-    private TiredExecutor executor;
+    //private TiredExecutor executor;
+    private SequentialExecutor executor; //SEQUENTIAL FOR DEBUGGING
 
     public LinearAlgebraEngine(int numThreads) {
         // Done: create executor with given thread count
-        executor = new TiredExecutor(numThreads);
+        //executor = new TiredExecutor(numThreads);
+        executor = new SequentialExecutor(1); //SEQUENTIAL FOR DEBUGGING
     }
 
     public ComputationNode run(ComputationNode computationRoot) {
@@ -69,14 +72,14 @@ public class LinearAlgebraEngine {
                 //Should not reach here
                 throw new UnsupportedOperationException("Unsupported computation node type"); 
         }
-        //executor.submitAll(tasks); //Uncomment when ready to run parallel tasks
+        executor.submitAll(tasks); 
         toResolve.resolve(leftMatrix.readRowMajor());
 
     }
     
     public List<Runnable> createAddTasks() {
         // Done: return tasks that perform row-wise addition
-         //Check dimensions to ensure they can be added
+        //Check dimensions to ensure they can be added
         if(leftMatrix.length() != rightMatrix.length() || 
             leftMatrix.get(0).length() != rightMatrix.get(0).length()){
             throw new IllegalArgumentException("Matrices dimensions do not match for addition");
