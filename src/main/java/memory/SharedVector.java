@@ -65,6 +65,7 @@ public class SharedVector {
     public void add(SharedVector other) {
         // Done: add two vectors
         if(other == null){throw new NullPointerException("Other vector is null");}
+        if(this.length() != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
 
         //Summing the result into this
         for (int i = 0; i < vector.length; i++) {
@@ -79,7 +80,6 @@ public class SharedVector {
         }
     }
 
-    //Assumes both vectors have the same orientation
     public double dot(SharedVector other) {
         // Done: compute dot product (row · column)
         if(this.length() != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
@@ -91,7 +91,7 @@ public class SharedVector {
     }
 
     public void vecMatMul(SharedMatrix matrix) {
-        // TODO: compute row-vector × matrix
+        //Done: compute row-vector × matrix 
          double[] result = new double[length()];
          if(matrix.getOrientation() == VectorOrientation.COLUMN_MAJOR){
              for (int i = 0; i < length(); i++) {
