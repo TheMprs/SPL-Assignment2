@@ -3,7 +3,9 @@ package spl.lae;
 import java.util.List;
 
 import memory.SharedMatrix;
+import memory.VectorOrientation;
 import parser.ComputationNode;
+import parser.ComputationNodeType;
 import scheduling.TiredExecutor;
 
 public class LinearAlgebraEngine {
@@ -24,19 +26,46 @@ public class LinearAlgebraEngine {
 
     public void loadAndCompute(ComputationNode node) {
         // TODO: load operand matrices
+        ComputationNodeType type = node.getNodeType();
+        if(type == ComputationNodeType.MATRIX){
+            return;
+        }
+        node.associativeNesting();
+        ComputationNode toResolve = node.findResolvable(); //Won't be null because already checked if it's a matrix
+        List<Runnable> tasks;
+        switch (toResolve.getNodeType()) {
+            case ADD:
+                leftMatrix.loadRowMajor(toResolve.getChildren().get(0).getMatrix());
+                rightMatrix.loadRowMajor(toResolve.getChildren().get(1).getMatrix());
+                tasks = createAddTasks();
+                break;
+            case NEGATE:
+                leftMatrix.loadRowMajor(toResolve.getChildren().get(0).getMatrix());
+                tasks = createNegateTasks();
+                break;
+            case MULTIPLY:
+                //For multiply convenience, left is row-major, right is column-major
+                leftMatrix.loadRowMajor(toResolve.getChildren().get(0).getMatrix());
+                rightMatrix.loadColumnMajor(toResolve.getChildren().get(1).getMatrix());
+                tasks = createMultiplyTasks();
+                break;
+            case TRANSPOSE:
+                leftMatrix.loadRowMajor(toResolve.getChildren().get(0).getMatrix());
+            default:
+                break;
+        }
+        
+
         // TODO: create compute tasks & submit tasks to executor
     }
 
-    //Currently only supports same orientation addition. Still need to handle row-major + col-major
+    
     public List<Runnable> createAddTasks() {
-        // TODO: return tasks that perform row-wise addition
+        // Done: return tasks that perform row-wise addition
         if(leftMatrix == null || rightMatrix == null){
             throw new NullPointerException("Matrices not loaded");
         }
-         if(leftMatrix.getOrientation() != rightMatrix.getOrientation()){
-            throw new UnsupportedOperationException("Matrices addition with different orientations not supported yet");
-        }
-        
+         //Check dimensions to ensure they can be added
         if(leftMatrix.length() != rightMatrix.length() || 
             leftMatrix.get(0).length() != rightMatrix.get(0).length()){
             throw new IllegalArgumentException("Matrices dimensions do not match for addition");
@@ -54,8 +83,28 @@ public class LinearAlgebraEngine {
     }
 
     public List<Runnable> createMultiplyTasks() {
-        // TODO: return tasks that perform row × matrix multiplication
-        return null;
+        // Done: return tasks that perform row × matrix multiplication
+
+        //compare left's cols to right's rows
+        if(leftMatrix.get(0).length() != rightMatrix.get(0).length()){
+            throw new IllegalArgumentException("Matrices dimensions do not match for multiplication");
+        }
+        
+        //verify orientations
+        if(leftMatrix.getOrientation() != VectorOrientation.ROW_MAJOR ||
+            rightMatrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){
+            throw new UnsupportedOperationException("Matrices multiplication with same orientations not supported");
+        }
+
+        List<Runnable> tasks = new java.util.LinkedList<Runnable>();
+        for (int i = 0; i < leftMatrix.length(); i++) {
+            final int index = i; //Capture index for lambda scope
+            Runnable multCurRow = () -> {
+                    leftMatrix.get(index).vecMatMul(rightMatrix);
+            }
+            tasks.add(multCurRow);
+        }
+        return tasks;
     }
 
     public List<Runnable> createNegateTasks() {
