@@ -36,20 +36,21 @@ public class SharedMatrix {
     *            |3||6|
     * 
     */
+   @Override
     public String toString(){
         String str="";
-        if(this.getOrientation() == VectorOrientation.ROW_MAJOR){
+        // if(this.getOrientation() == VectorOrientation.ROW_MAJOR){
             for (int row = 0; row < vectors.length; row++) 
                 str+=vectors[row].toString()+"\n";
-        }
-        else {
-            for (int row = 0; row < vectors.length; row++) {
-                for (int col = 0; col < vectors[0].length(); col++) {
-                    str+="|"+this.get(col).get(row)+"|";
-                }
-                str+="\n";
-            }
-        }
+        // }
+        // else {
+        //     for (int row = 0; row < vectors.length; row++) {
+        //         for (int col = 0; col < vectors[0].length(); col++) {
+        //             str+="|"+this.get(col).get(row)+"|";
+        //         }
+        //         str+="\n";
+        //     }
+        // }
         return str;
     }
 
@@ -72,11 +73,11 @@ public class SharedMatrix {
         vectors = new SharedVector[columns];
         
         for (int col = 0; col < columns; col++) {
-            double[] newRow = new double[matrix.length];
+            double[] colData = new double[matrix.length];
             for (int row = 0; row < matrix.length; row++) {
-                newRow[row] = matrix[col][row];
+                colData[row] = matrix[row][col];
             }
-            vectors[col] = new SharedVector(newRow, VectorOrientation.COLUMN_MAJOR);
+            vectors[col] = new SharedVector(colData, VectorOrientation.COLUMN_MAJOR);
         }
     }
 
@@ -97,7 +98,7 @@ public class SharedMatrix {
             matrixContents = new double[vectors[0].length()][length()];
             for(int col=0;col< length();col++){
                 for(int row=0;row<vectors[0].length();row++){
-                    matrixContents[col][row]=this.get(row).get(col);
+                    matrixContents[row][col]=this.get(col).get(row);
                 }
             }
         }
@@ -106,7 +107,7 @@ public class SharedMatrix {
 
     public SharedVector get(int index) {
         // Done: return vector at index
-        if(index<0 || index>vectors.length)
+        if(index<0 || index >= vectors.length)
             throw new IndexOutOfBoundsException("index out of bounds");
         return this.vectors[index];
     }

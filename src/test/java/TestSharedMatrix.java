@@ -50,17 +50,25 @@ public class TestSharedMatrix {
     
     public static void testMatrixRowMajorRead() {
         double[][] table = { {1,2}, {3,4} };
-        SharedMatrix rowMatrix = new SharedMatrix(); 
-        SharedMatrix colMatrix = new SharedMatrix(); 
-        
-        rowMatrix.loadRowMajor(table);
-        colMatrix.loadColumnMajor(table);
+        double[][] line = { {1,2,3} };
 
-        double[][] readRowTable = rowMatrix.readRowMajor();
-        double[][] readColTable = colMatrix.readRowMajor();
+        SharedMatrix rowTable = new SharedMatrix(); 
+        SharedMatrix colTable = new SharedMatrix();
+        SharedMatrix rowLine = new SharedMatrix(); 
+        SharedMatrix colLine = new SharedMatrix();
+
+        rowTable.loadRowMajor(table);
+        colTable.loadColumnMajor(table);
+        rowLine.loadRowMajor(line);
+        colLine.loadColumnMajor(line);
+
+        double[][] readRowTable = rowTable.readRowMajor();
+        double[][] readColTable = colTable.readRowMajor();
+        double[][] readRowLine = rowLine.readRowMajor();
+        double[][] readColLine = colLine.readRowMajor();    
 
         System.out.println("Row Major Matrix:");
-        System.out.print(rowMatrix);
+        System.out.print(rowTable);
         System.out.println("Read Row Major Table:");
         for (double[] row : readRowTable) {
             System.out.print("[ ");
@@ -71,9 +79,31 @@ public class TestSharedMatrix {
         }
 
         System.out.println("Column Major Matrix:");
-        System.out.print(colMatrix);
+        System.out.print(colTable);
         System.out.println("Read Column Major Table:");
         for (double[] row : readColTable) {
+            System.out.print("[ ");
+            for (double val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println("]");
+        }
+
+        System.out.println("Row Major Line:");
+        System.out.print(rowLine);
+        System.out.println("Read Row Major Line:");
+        for (double[] row : readRowLine) {
+            System.out.print("[ ");
+            for (double val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println("]");
+        }
+
+        System.out.println("Column Major Line:");
+        System.out.print(colLine);
+        System.out.println("Read Column Major Line:");
+        for (double[] row : readColLine) {
             System.out.print("[ ");
             for (double val : row) {
                 System.out.print(val + " ");
