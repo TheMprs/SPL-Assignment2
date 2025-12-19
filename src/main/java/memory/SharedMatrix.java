@@ -55,7 +55,8 @@ public class SharedMatrix {
 
     public void loadRowMajor(double[][] matrix) {
     // Done: replace internal data with new row-major matrix
-        if(matrix==null) throw new IllegalArgumentException("Input matrix cannot be null");
+        if(matrix==null || matrix.length==0 || matrix[0].length==0) 
+            throw new IllegalArgumentException("Input matrix cannot be null or empty");
         int rows = matrix.length;
         vectors = new SharedVector[rows];
         for(int i=0; i<rows;i++){
