@@ -25,16 +25,19 @@ public class LinearAlgebraEngine {
     }
 
     public void loadAndCompute(ComputationNode node) {
-        // TODO: load operand matrices
-        // TODO: create compute tasks & submit tasks to executor
+        // Done: load operand matrices
+        // Done: create compute tasks & submit tasks to executor
 
         ComputationNodeType type = node.getNodeType();
         if(type == ComputationNodeType.MATRIX){
             return;
         }
+        //First, perform associative nesting to simplify tree
         node.associativeNesting();
-        ComputationNode toResolve = node.findResolvable(); //Won't be null because already checked if it's a matrix
+        //Then, find first resolvable node (cannot be null bc checked above)
+        ComputationNode toResolve = node.findResolvable();
         List<Runnable> tasks;
+        //Load matrices based on operation type
         switch (toResolve.getNodeType()) {
             case ADD:
                 //For addition, both are row-major
@@ -47,7 +50,7 @@ public class LinearAlgebraEngine {
                 tasks = createNegateTasks();
                 break;
             case MULTIPLY:
-                //For multiply convenience, left is row-major, right is column-major
+                //For multiplication convenience, left is row-major, right is column-major
                 leftMatrix.loadRowMajor(toResolve.getChildren().get(0).getMatrix());
                 rightMatrix.loadColumnMajor(toResolve.getChildren().get(1).getMatrix());
                 tasks = createMultiplyTasks();
@@ -57,13 +60,13 @@ public class LinearAlgebraEngine {
                 tasks = createTransposeTasks();
                 break;
             default:
-                throw new UnsupportedOperationException("Unsupported computation node type"); //Should not reach here
+                //Should not reach here
+                throw new UnsupportedOperationException("Unsupported computation node type"); 
         }
         //executor.submitAll(tasks); //Uncomment when ready to run parallel tasks
         
 
     }
-
     
     public List<Runnable> createAddTasks() {
         // Done: return tasks that perform row-wise addition
