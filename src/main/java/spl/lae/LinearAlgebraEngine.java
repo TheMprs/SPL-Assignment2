@@ -26,6 +26,8 @@ public class LinearAlgebraEngine {
 
     public void loadAndCompute(ComputationNode node) {
         // TODO: load operand matrices
+        // TODO: create compute tasks & submit tasks to executor
+
         ComputationNodeType type = node.getNodeType();
         if(type == ComputationNodeType.MATRIX){
             return;
@@ -35,6 +37,7 @@ public class LinearAlgebraEngine {
         List<Runnable> tasks;
         switch (toResolve.getNodeType()) {
             case ADD:
+                //For addition, both are row-major
                 leftMatrix.loadRowMajor(toResolve.getChildren().get(0).getMatrix());
                 rightMatrix.loadRowMajor(toResolve.getChildren().get(1).getMatrix());
                 tasks = createAddTasks();
@@ -51,12 +54,14 @@ public class LinearAlgebraEngine {
                 break;
             case TRANSPOSE:
                 leftMatrix.loadRowMajor(toResolve.getChildren().get(0).getMatrix());
-            default:
+                tasks = createTransposeTasks();
                 break;
+            default:
+                throw new UnsupportedOperationException("Unsupported computation node type"); //Should not reach here
         }
+        //executor.submitAll(tasks); //Uncomment when ready to run parallel tasks
         
 
-        // TODO: create compute tasks & submit tasks to executor
     }
 
     
@@ -101,7 +106,7 @@ public class LinearAlgebraEngine {
             final int index = i; //Capture index for lambda scope
             Runnable multCurRow = () -> {
                     leftMatrix.get(index).vecMatMul(rightMatrix);
-            }
+            };
             tasks.add(multCurRow);
         }
         return tasks;
@@ -121,7 +126,7 @@ public class LinearAlgebraEngine {
     }
 
     public List<Runnable> createTransposeTasks() {
-        // TODO: return tasks that transpose rows
+        // Done: return tasks that transpose rows
         List<Runnable> tasks = new java.util.LinkedList<Runnable>();
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int index = i; //Capture index for lambda scope
