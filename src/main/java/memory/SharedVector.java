@@ -25,7 +25,7 @@ public class SharedVector {
 
     public double get(int index) {
         // Done: return element at index (read-locked)
-        if (index < 0 || index > vector.length){
+        if (index < 0 || index >= vector.length){
             throw new IndexOutOfBoundsException("Iligal index");
         }
         return vector[index];
@@ -92,20 +92,28 @@ public class SharedVector {
 
     public void vecMatMul(SharedMatrix matrix) {
         //Done: compute row-vector × matrix 
-         double[] result = new double[length()];
-         if(matrix.getOrientation() == VectorOrientation.COLUMN_MAJOR){
-             for (int i = 0; i < length(); i++) {
-                result[i] = rowxcolumnMul(matrix.get(i));
-             }
-            }
-        else{//Matrix is oriented by rows
-            throw new UnsupportedOperationException("Matrix is not in column major orientation");
+        if(this.orientation != VectorOrientation.ROW_MAJOR){
+            throw new UnsupportedOperationException("vecMatMul not supported for non-row major vectors");
         }
+        if(matrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){
+            throw new UnsupportedOperationException("vecMatMul not supported for non-column major matrices");
+        }
+         double[] result = new double[matrix.length()];
+         
+         for (int i = 0; i < result.length; i++) {
+            result[i] = rowxcolumnMul(matrix.get(i));
+        }
+        this.vector = result;
     }
 
     //Commputes row vector * column vector multipication
     private double rowxcolumnMul (SharedVector other){
-        if(orientation != VectorOrientation.COLUMN_MAJOR){throw new UnsupportedOperationException("left vector is not row vector");}
+        if(orientation != VectorOrientation.ROW_MAJOR){
+            throw new UnsupportedOperationException("left vector is not row vector");
+        }
+        if(other.getOrientation() != VectorOrientation.COLUMN_MAJOR){
+            throw new UnsupportedOperationException("right matrix is not column matrix");
+        }
         
         //row * column is the same as dot product <row, column transposed>
         return dot(other);
