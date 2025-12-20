@@ -7,7 +7,7 @@ import memory.VectorOrientation;
 import parser.ComputationNode;
 import parser.ComputationNodeType;
 import scheduling.TiredExecutor;
-import scheduling.SequentialExecutor; //SEQUENTIAL FOR DEBUGGING
+//import scheduling.SequentialExecutor; //SEQUENTIAL FOR DEBUGGING
 
 public class LinearAlgebraEngine {
 
@@ -148,7 +148,7 @@ public class LinearAlgebraEngine {
     }
 
     public String getWorkerReport() {
-        // TODO: return summary of worker activity
-        return null;
+        // Done: return summary of worker activity
+        return executor.getWorkerReport();
     }
 }

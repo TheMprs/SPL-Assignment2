@@ -1,8 +1,5 @@
 package scheduling;
 
-import java.util.LinkedList;
-import java.util.List;
-
 //Don't forget to remove this class before submission to moodle
 public class SequentialExecutor {
     public SequentialExecutor(int numThreads) {

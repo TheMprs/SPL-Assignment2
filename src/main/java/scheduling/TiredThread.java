@@ -81,8 +81,6 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
     @Override
     public void run() {
         // Done
-        // check if there are tasks to perform, and not busy
-        // get task from handoff, run it, update timeUsed and timeIdle
         while(alive.get()){
 
             // thread is now idle, record start time
