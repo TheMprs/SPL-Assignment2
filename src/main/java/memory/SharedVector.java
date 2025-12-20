@@ -25,139 +25,176 @@ public class SharedVector {
 
     public double get(int index) {
         // Done: return element at index (read-locked)
-        if (index < 0 || index >= vector.length){
+        readLock();
+        try{
+            if (index < 0 || index >= vector.length){
             throw new IndexOutOfBoundsException("Iligal index");
+            }
+            return vector[index];
+        } finally {
+            // Ensures that the lock is released even if an exception occurs
+            readUnlock();
         }
-        return vector[index];
     }
 
     public int length() {
         // Done: return vector length
-        return vector.length;
+        readLock();
+        try{
+            return vector.length;
+        } finally {
+            //Unlocks after the return value is stored, right before exiting the method
+            readUnlock();
+        }        
     }
 
     public VectorOrientation getOrientation() {
         // Done: return vector orientation
-        return orientation;
+        readLock();
+        try{
+            return orientation;
+        } finally {
+            //Unlocks after the return value is stored, right before exiting the method
+            readUnlock();
+        }   
     }
 
     public void writeLock() {
-        // TODO: acquire write lock
+        // Done: acquire write lock
+        lock.writeLock().lock();
     }
 
     public void writeUnlock() {
-        // TODO: release write lock
+        // Done: release write lock
+        lock.writeLock().unlock();
     }
 
     public void readLock() {
-        // TODO: acquire read lock
+        // Done: acquire read lock
+        lock.readLock().lock();
     }
 
     public void readUnlock() {
-        // TODO: release read lock
+        // Done: release read lock
+        lock.readLock().unlock();
     }
 
     public void transpose() {
         // Done: transpose vector
-        orientation = orientation == VectorOrientation.ROW_MAJOR ? VectorOrientation.COLUMN_MAJOR : VectorOrientation.ROW_MAJOR;
+        
+        writeLock();
+        orientation = orientation == VectorOrientation.ROW_MAJOR ? VectorOrientation.COLUMN_MAJOR 
+                                        : VectorOrientation.ROW_MAJOR;
+        writeUnlock();
     }
 
     public void add(SharedVector other) {
         // Done: add two vectors
-        if(other == null){throw new NullPointerException("Other vector is null");}
-        if(this.length() != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
+        try{
+            writeLock();
+            if(other == null){throw new NullPointerException("Other vector is null");}
+            if(vector.length != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
 
-        //Summing the result into this
-        for (int i = 0; i < vector.length; i++) {
-            vector[i] = vector[i]+ other.get(i);
+            //Summing the result into this
+            for (int i = 0; i < vector.length; i++) {
+                // No deadlock risk: In the engine we always write to the Left Matrix and read from the Right Matrix.
+                vector[i] = vector[i]+ other.get(i);
+            }
         }
+        finally{
+            writeUnlock();
+        }
+        
     }
 
     public void negate() {
         // Done: negate vector
-        for (int i = 0; i < vector.length; i++) {
+        try{
+            writeLock();
+            for (int i = 0; i < vector.length; i++) {
             vector[i] = -vector[i];
+        }
+        } finally {
+            writeUnlock();
         }
     }
 
     public double dot(SharedVector other) {
         // Done: compute dot product (row · column)
-        if(this.length() != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
-        double sum = 0;
-        for (int i = 0; i < vector.length; i++) {
-            sum += vector[i]*other.get(i);
+        try{
+            readLock();
+            if(other == null){throw new NullPointerException("Other vector is null");}
+            if(vector.length != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
+            double sum = 0;
+            for (int i = 0; i < vector.length; i++) {
+                // Using get() per iteration incurs overhead but prevents deadlocks
+                // by avoiding nested locks without global ordering.
+                sum += vector[i]*other.get(i);
+            }
+            return sum;
         }
-        return sum;
+        finally{
+            readUnlock();
+        }
     }
 
     public void vecMatMul(SharedMatrix matrix) {
         //Done: compute row-vector × matrix 
-        if(this.orientation != VectorOrientation.ROW_MAJOR){
+        try{
+            writeLock();
+            if(this.orientation != VectorOrientation.ROW_MAJOR){
             throw new UnsupportedOperationException("vecMatMul not supported for non-row major vectors");
+            }
+            if(matrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){
+                throw new UnsupportedOperationException("vecMatMul not supported for non-column major matrices");
+            }
+            double[] result = new double[matrix.length()];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = dot(matrix.get(i));
+            }
+            this.vector = result;
         }
-        if(matrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){
-            throw new UnsupportedOperationException("vecMatMul not supported for non-column major matrices");
+        finally{
+            writeUnlock();
         }
-         double[] result = new double[matrix.length()];
-         
-         for (int i = 0; i < result.length; i++) {
-            result[i] = rowxcolumnMul(matrix.get(i));
-        }
-        this.vector = result;
     }
 
-    //Commputes row vector * column vector multipication
-    private double rowxcolumnMul (SharedVector other){
-        if(orientation != VectorOrientation.ROW_MAJOR){
-            throw new UnsupportedOperationException("left vector is not row vector");
-        }
-        if(other.getOrientation() != VectorOrientation.COLUMN_MAJOR){
-            throw new UnsupportedOperationException("right matrix is not column matrix");
-        }
+    @Override
+    public boolean equals(Object other) {
         
-        //row * column is the same as dot product <row, column transposed>
-        return dot(other);
-    }
-
-
-@Override
-public boolean equals(Object other) {
-    
-    if (this == other) return true;
-    
-    if (other == null || getClass() != other.getClass()) return false;
-    
-    
-    SharedVector otherVector = (SharedVector) other;
-    if (orientation != otherVector.getOrientation() || length() != otherVector.length()){return false;}
-    for (int i = 0; i < vector.length; i++) {
-        if(vector[i]!= otherVector.get(i)){
-            return false;
-        }
-    }
-    return true;
-    }
-
-@Override 
-public String toString(){
-    StringBuilder sb = new StringBuilder();
-    if (orientation == VectorOrientation.ROW_MAJOR) {
-        sb.append("[");
+        if (this == other) return true;
+        
+        if (other == null || getClass() != other.getClass()) return false;
+        
+        
+        SharedVector otherVector = (SharedVector) other;
+        if (orientation != otherVector.getOrientation() || length() != otherVector.length()){return false;}
         for (int i = 0; i < vector.length; i++) {
-            sb.append(vector[i]);
-            if (i < vector.length - 1) {
-                sb.append(" ");
+            if(vector[i]!= otherVector.get(i)){
+                return false;
             }
         }
-        sb.append("]");
-    } else {
-        for (int i = 0; i < vector.length; i++) {
-            sb.append("| ").append(vector[i]).append(" |");
-            if (i < vector.length - 1) {
-                sb.append("\n");
+        return true;
+        }
+    
+    @Override 
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        if (orientation == VectorOrientation.ROW_MAJOR) {
+            sb.append("[");
+            for (int i = 0; i < vector.length; i++) {
+                sb.append(vector[i]);
+                if (i < vector.length - 1) {
+                    sb.append(" ");
+                }
+            }
+            sb.append("]");
+        } else { // column major
+            sb.append("|");
+            for (int i = 0; i < vector.length; i++) {
+                sb.append(" ").append(vector[i]).append(" |");
             }
         }
+        return sb.toString();
     }
-    return sb.toString();
-}
 }
