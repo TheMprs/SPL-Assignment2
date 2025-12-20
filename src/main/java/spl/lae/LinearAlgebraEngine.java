@@ -30,6 +30,12 @@ public class LinearAlgebraEngine {
         while(computationRoot.getNodeType() != ComputationNodeType.MATRIX){
             loadAndCompute(computationRoot);
         }
+        try{
+            executor.shutdown();
+        }
+        catch (InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
         return computationRoot;
     }
 
