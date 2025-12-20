@@ -125,7 +125,7 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
                 // executor called for shutdown while waiting for a task
                 Thread.currentThread().interrupt();
                 alive.set(false);    
-            }
+            } 
         }
     }
 

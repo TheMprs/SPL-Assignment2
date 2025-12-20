@@ -1,3 +1,5 @@
+
+
 import java.util.Vector;
 
 import memory.SharedMatrix;
@@ -7,9 +9,17 @@ import memory.VectorOrientation;
 public class TestSharedMatrix {
     public static void main(String[] args) {
         System.out.println(" --- TESTING SHARED MATRIX FUNCTIONS ---");
+        
+        System.out.println("\n-- Testing Matrix Row Major Load --");
         testMatrixRowMajorLoad();
+
+        System.out.println("\n-- Testing Matrix Column Major Load --");
         testMatrixColumnMajorLoad();
+        
+        System.out.println("\n-- Testing Matrix Row Major Read --");
         testMatrixRowMajorRead();
+        
+        System.out.println("\n-- Testing Matrix Stats --");
         testMatrixStats();
 
         TestUtils.summary();
