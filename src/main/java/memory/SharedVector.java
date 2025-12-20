@@ -163,38 +163,49 @@ public class SharedVector {
     public boolean equals(Object other) {
         
         if (this == other) return true;
-        
+
         if (other == null || getClass() != other.getClass()) return false;
         
-        
         SharedVector otherVector = (SharedVector) other;
-        if (orientation != otherVector.getOrientation() || length() != otherVector.length()){return false;}
+        readLock();
+        try{
+            if (orientation != otherVector.getOrientation() || length() != otherVector.length()){return false;}
         for (int i = 0; i < vector.length; i++) {
             if(vector[i]!= otherVector.get(i)){
                 return false;
             }
         }
         return true;
+        } finally {
+            readUnlock();
         }
+        
+    }
     
     @Override 
     public String toString(){
-        StringBuilder sb = new StringBuilder();
-        if (orientation == VectorOrientation.ROW_MAJOR) {
-            sb.append("[");
-            for (int i = 0; i < vector.length; i++) {
-                sb.append(vector[i]);
-                if (i < vector.length - 1) {
-                    sb.append(" ");
+        readLock();
+        try{
+            StringBuilder sb = new StringBuilder();
+            if (orientation == VectorOrientation.ROW_MAJOR) {
+                sb.append("[");
+                for (int i = 0; i < vector.length; i++) {
+                    sb.append(vector[i]);
+                    if (i < vector.length - 1) {
+                        sb.append(" ");
+                    }
+                }
+                sb.append("]");
+            } else { // column major
+                sb.append("|");
+                for (int i = 0; i < vector.length; i++) {
+                    sb.append(" ").append(vector[i]).append(" |");
                 }
             }
-            sb.append("]");
-        } else { // column major
-            sb.append("|");
-            for (int i = 0; i < vector.length; i++) {
-                sb.append(" ").append(vector[i]).append(" |");
-            }
+            return sb.toString();
         }
-        return sb.toString();
+        finally{
+            readUnlock();
+        }
     }
 }
