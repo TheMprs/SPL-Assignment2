@@ -34,6 +34,8 @@ public class TestSharedMatrix {
         TestUtils.checkObject("Matrix Row Major Content", tinyMatrix.get(0).get(0), 4.0);
     
 
+        System.out.println("First row of Row Major Matrix:");
+        System.out.println(matrix.get(0));    
     }
     
     public static void testMatrixColumnMajorLoad() {
@@ -41,11 +43,14 @@ public class TestSharedMatrix {
         SharedMatrix matrix = new SharedMatrix(); 
         matrix.loadColumnMajor(table);
 
-        double[] arr = {1.0,2.0};
+        double[] arr = {1.0,3.0};
         SharedVector firstCol = new SharedVector(arr,VectorOrientation.COLUMN_MAJOR);
 
         TestUtils.checkObject("Matrix Column Major Orientation", matrix.getOrientation(), VectorOrientation.COLUMN_MAJOR);
         TestUtils.checkObject("Matrix Column Major Content", matrix.get(0),firstCol);
+        
+        System.out.println("First row of Column Major Matrix:");
+        System.out.println(matrix.get(0));
     }
     
     public static void testMatrixRowMajorRead() {

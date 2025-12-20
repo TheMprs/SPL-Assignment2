@@ -15,7 +15,8 @@ public class SharedMatrix {
     }
 
     //helper method to check if this==other
-    @Override public boolean equals(Object other){
+    @Override 
+    public boolean equals(Object other){
         if(this == other) return true;
         else { 
             if(other == null || !(this.getClass() == other.getClass()) ) 
@@ -29,37 +30,25 @@ public class SharedMatrix {
         }
     }
 
-    /**helper method to print matrix
-    * vector output will change based on its orientation
-    * {1,2,3} -> |1||4|  / |1 2 3|
-    * {4,5,6}    |2||5|    |4 5 6|
-    *            |3||6|
-    * 
-    */
-   @Override
-    public String toString(){
-        String str="";
-        // if(this.getOrientation() == VectorOrientation.ROW_MAJOR){
-            for (int row = 0; row < vectors.length; row++) 
-                str+=vectors[row].toString()+"\n";
-        // }
-        // else {
-        //     for (int row = 0; row < vectors.length; row++) {
-        //         for (int col = 0; col < vectors[0].length(); col++) {
-        //             str+="|"+this.get(col).get(row)+"|";
-        //         }
-        //         str+="\n";
-        //     }
-        // }
-        return str;
+    //helper method to print matrix
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < vectors.length; i++) {
+            // Use .append to ADD to the string, don't replace it!
+            sb.append(vectors[i].toString()).append("\n"); 
+        }
+        return sb.toString();
     }
-
+    
     public void loadRowMajor(double[][] matrix) {
     // Done: replace internal data with new row-major matrix
         if(matrix==null || matrix.length==0 || matrix[0].length==0) 
             throw new IllegalArgumentException("Input matrix cannot be null or empty");
         int rows = matrix.length;
         vectors = new SharedVector[rows];
+
+        //no need to lock all vectors for writing, (volatile type prevents write conflicts)
         for(int i=0; i<rows;i++){
             SharedVector vector = new SharedVector(matrix[i], VectorOrientation.ROW_MAJOR);
             vectors[i]=vector;
@@ -72,6 +61,7 @@ public class SharedMatrix {
         int columns = matrix[0].length;
         vectors = new SharedVector[columns];
         
+        //no need to lock all vectors for writing, (volatile type prevents write conflicts)        
         for (int col = 0; col < columns; col++) {
             double[] colData = new double[matrix.length];
             for (int row = 0; row < matrix.length; row++) {
@@ -85,24 +75,31 @@ public class SharedMatrix {
         // Done: return matrix contents as a row-major double[][]
         double[][] matrixContents;
         
-        //check orientation
-        if(getOrientation() == VectorOrientation.ROW_MAJOR){ //row major
-            matrixContents = new double[length()][vectors[0].length()];
-            for(int row=0;row< length();row++){
-                for(int col=0;col<vectors[0].length();col++){
-                    matrixContents[row][col]=this.get(row).get(col);
+        acquireAllVectorReadLocks(vectors);
+        try {
+            //check orientation
+            if(getOrientation() == VectorOrientation.ROW_MAJOR){ //row major
+                matrixContents = new double[length()][vectors[0].length()];
+                for(int row=0;row< length();row++){
+                    for(int col=0;col<vectors[0].length();col++){
+                        matrixContents[row][col]=this.get(row).get(col);
+                    }
                 }
             }
-        }
-        else{ //column major
-            matrixContents = new double[vectors[0].length()][length()];
-            for(int col=0;col< length();col++){
-                for(int row=0;row<vectors[0].length();row++){
-                    matrixContents[row][col]=this.get(col).get(row);
+            else{ //column major
+                matrixContents = new double[vectors[0].length()][length()];
+                for(int col=0;col< length();col++){
+                    for(int row=0;row<vectors[0].length();row++){
+                        matrixContents[row][col]=this.get(col).get(row);
+                    }
                 }
             }
+            return matrixContents;
+        } 
+        //use finally to ensure locks are released even if exception occurs
+        finally {
+            releaseAllVectorReadLocks(vectors);
         }
-        return matrixContents;
     }
 
     public SharedVector get(int index) {
@@ -126,17 +123,29 @@ public class SharedMatrix {
 
     private void acquireAllVectorReadLocks(SharedVector[] vecs) {
         // TODO: acquire read lock for each vector
+        for (int i = 0; i < vecs.length; i++) {
+            vecs[i].readLock();
+        }
     }
 
     private void releaseAllVectorReadLocks(SharedVector[] vecs) {
         // TODO: release read locks
+        for (int i = 0; i < vecs.length; i++) {
+            vecs[i].readUnlock();
+        }
     }
 
     private void acquireAllVectorWriteLocks(SharedVector[] vecs) {
         // TODO: acquire write lock for each vector
+        for (int i = 0; i < vecs.length; i++) {
+            vecs[i].writeLock();
+        }
     }
 
     private void releaseAllVectorWriteLocks(SharedVector[] vecs) {
         // TODO: release write locks
+        for (int i = 0; i < vecs.length; i++) {
+            vecs[i].writeUnlock();
+        }
     }
 }
