@@ -66,33 +66,65 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
      * Inserts a poison pill so the worker wakes up and exits.
      */
     public void shutdown() {
-        // TODO
-        alive.set(false);
-        handoff.offer(POISON_PILL);
-        //update worker values;
+        // Done: insert poison pill into handoff queue
+        // the put operation is blocking, meaning it will wait until there is space
+        // in the queue to insert the poison pill
+        try {
+            handoff.put(POISON_PILL);
+        } catch (InterruptedException e) { 
+            // if interrupted while waiting we just restore the interrupt status
+            // interrupted means someone wants to stop the thread
+            Thread.currentThread().interrupt(); 
+        }
     }
 
     @Override
     public void run() {
-        // TODO
-        // check if there are tasks to perform, if alive, and not busy
+        // Done
+        // check if there are tasks to perform, and not busy
         // get task from handoff, run it, update timeUsed and timeIdle
-        while(!handoff.isEmpty() && !isBusy() && isAlive()){
-            Runnable task = handoff.remove();
-            // check for poison pill
-            if(task == POISON_PILL){
-                shutdown();
-            }
-            else { 
-                // update thread stats
-                busy.set(true);
-                idleStartTime.set(System.nanoTime());
+        while(alive.get()){
+
+            // thread is now idle, record start time
+            idleStartTime.set(System.nanoTime());
+                        
+            try { 
+                // we use try because take() can throw InterruptedException
+                // if interrupted while waiting
+                // take() is blocking, waits until a task is available
+                Runnable task = handoff.take();
                 
-                task.run();
-                // update time stats
-                timeIdle.addAndGet(System.nanoTime() - getTimeIdle());
-                timeUsed.addAndGet(System.nanoTime() - idleStartTime.get());
-                busy.set(false);
+                long jobStartTime = System.nanoTime();
+                // time idle is (totalTimeIdle + (current time - time spent waiting for current job))
+                timeIdle.addAndGet(System.nanoTime() - idleStartTime.get());
+                
+                // check for poison pill
+                if(task == POISON_PILL){
+                    alive.set(false);
+                }
+                else { 
+                    // start executing task
+                    busy.set(true);
+                    
+                    try {
+                        task.run();
+                    }
+                    catch (Exception e) {
+                        // math failed, log and continue
+                        System.out.println("worker " + id + " encountered an exception while executing a task: " + e.getMessage());
+                    }
+                    finally {
+                        // time used is (totalTimeUsed + (current time - job start time))
+                        timeUsed.addAndGet(System.nanoTime() - jobStartTime);
+                        // time used is (current time - job time start + previous time used)
+                        busy.set(false);        
+                    }
+                }
+            }
+            catch (InterruptedException e) {
+                // executor called for shutdown while waiting for a task
+                Thread.currentThread().interrupt();
+                alive.set(false);    
             }
         }
     }
@@ -101,9 +133,9 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
     public int compareTo(TiredThread o) {
         // TODO
         // compare fatigues between threads, 
-        // making the highest fatigued thread be the bigger one
-        if(o.getFatigue() < this.getFatigue()) return -1;
-        else if(o.getFatigue() > this.getFatigue()) return 1;
+        // making the most tired one have the lowest priority
+        if(o.getFatigue() < this.getFatigue()) return 1;
+        else if(o.getFatigue() > this.getFatigue()) return -1;
         return 0;
     }
 }
