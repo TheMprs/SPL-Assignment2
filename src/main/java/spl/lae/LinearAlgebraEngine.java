@@ -13,13 +13,13 @@ public class LinearAlgebraEngine {
 
     private SharedMatrix leftMatrix = new SharedMatrix();
     private SharedMatrix rightMatrix = new SharedMatrix();
-    //private TiredExecutor executor;
-    private SequentialExecutor executor; //SEQUENTIAL FOR DEBUGGING
+    private TiredExecutor executor;
+    //private SequentialExecutor executor; //SEQUENTIAL FOR DEBUGGING
 
     public LinearAlgebraEngine(int numThreads) {
         // Done: create executor with given thread count
-        //executor = new TiredExecutor(numThreads);
-        executor = new SequentialExecutor(1); //SEQUENTIAL FOR DEBUGGING
+        executor = new TiredExecutor(numThreads);
+        //executor = new SequentialExecutor(1); //SEQUENTIAL FOR DEBUGGING
     }
 
     public ComputationNode run(ComputationNode computationRoot) {
