@@ -17,66 +17,90 @@ public class SharedMatrix {
     //helper method to check if this==other
     @Override 
     public boolean equals(Object other){
-        if(this == other) return true;
-        else { 
-            if(other == null || !(this.getClass() == other.getClass()) ) 
-                return false;
-            SharedMatrix otherMatrix = (SharedMatrix) other;
-            for (int index = 0; index < otherMatrix.length(); index++) {
-                if(!this.get(index).equals(otherMatrix.get(index)))
+        try{
+            acquireAllVectorReadLocks(vectors);
+
+            if(this == other) return true;
+            else { 
+                if(other == null || !(this.getClass() == other.getClass()) ) 
                     return false;
+                SharedMatrix otherMatrix = (SharedMatrix) other;
+                for (int index = 0; index < otherMatrix.length(); index++) {
+                    if(!this.get(index).equals(otherMatrix.get(index)))
+                        return false;
+                }
+                return true;
             }
-            return true;
+        }
+        finally{
+            releaseAllVectorReadLocks(vectors);
         }
     }
 
     //helper method to print matrix
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < vectors.length; i++) {
-            // Use .append to ADD to the string, don't replace it!
-            sb.append(vectors[i].toString()).append("\n"); 
+        try {
+            acquireAllVectorReadLocks(vectors);
+            
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < vectors.length; i++) {
+                // Use .append to ADD to the string, don't replace it!
+                sb.append(vectors[i].toString()).append("\n"); 
+            }
+            return sb.toString();    
+        } 
+        finally {
+            releaseAllVectorReadLocks(vectors);
         }
-        return sb.toString();
     }
     
     public void loadRowMajor(double[][] matrix) {
     // Done: replace internal data with new row-major matrix
-        if(matrix==null || matrix.length==0 || matrix[0].length==0) 
-            throw new IllegalArgumentException("Input matrix cannot be null or empty");
-        int rows = matrix.length;
-        vectors = new SharedVector[rows];
+        try {
+            acquireAllVectorWriteLocks(vectors);
+            if(matrix==null || matrix.length==0 || matrix[0].length==0) 
+                throw new IllegalArgumentException("Input matrix cannot be null or empty");
+            int rows = matrix.length;
+            vectors = new SharedVector[rows];
 
-        //no need to lock all vectors for writing, (volatile type prevents write conflicts)
-        for(int i=0; i<rows;i++){
-            SharedVector vector = new SharedVector(matrix[i], VectorOrientation.ROW_MAJOR);
-            vectors[i]=vector;
+            for(int i=0; i<rows;i++){
+                SharedVector vector = new SharedVector(matrix[i], VectorOrientation.ROW_MAJOR);
+                vectors[i]=vector;
+            }
+        }
+        finally{
+            releaseAllVectorWriteLocks(vectors);
         }
     }
 
     public void loadColumnMajor(double[][] matrix) {
         // Done: replace internal data with new column-major matrix
-        if(matrix==null) throw new IllegalArgumentException("Input matrix cannot be null");
-        int columns = matrix[0].length;
-        vectors = new SharedVector[columns];
+        try{
+            acquireAllVectorWriteLocks(vectors);
         
-        //no need to lock all vectors for writing, (volatile type prevents write conflicts)        
-        for (int col = 0; col < columns; col++) {
-            double[] colData = new double[matrix.length];
-            for (int row = 0; row < matrix.length; row++) {
-                colData[row] = matrix[row][col];
+            if(matrix==null) throw new IllegalArgumentException("Input matrix cannot be null");
+            int columns = matrix[0].length;
+            vectors = new SharedVector[columns];
+            
+            for (int col = 0; col < columns; col++) {
+                double[] colData = new double[matrix.length];
+                for (int row = 0; row < matrix.length; row++) {
+                    colData[row] = matrix[row][col];
+                }
+                vectors[col] = new SharedVector(colData, VectorOrientation.COLUMN_MAJOR);
             }
-            vectors[col] = new SharedVector(colData, VectorOrientation.COLUMN_MAJOR);
+        }
+        finally{
+            releaseAllVectorWriteLocks(vectors);
         }
     }
 
     public double[][] readRowMajor() {
         // Done: return matrix contents as a row-major double[][]
-        double[][] matrixContents;
-        
-        acquireAllVectorReadLocks(vectors);
         try {
+            acquireAllVectorReadLocks(vectors);
+            double[][] matrixContents;
             //check orientation
             if(getOrientation() == VectorOrientation.ROW_MAJOR){ //row major
                 matrixContents = new double[length()][vectors[0].length()];
@@ -104,21 +128,41 @@ public class SharedMatrix {
 
     public SharedVector get(int index) {
         // Done: return vector at index
-        if(index<0 || index >= vectors.length)
-            throw new IndexOutOfBoundsException("index out of bounds");
-        return this.vectors[index];
+        try {
+            acquireAllVectorReadLocks(vectors);    
+            if(index<0 || index >= vectors.length)
+                throw new IndexOutOfBoundsException("index out of bounds");
+            
+            return this.vectors[index];
+    
+        } 
+        finally {
+            releaseAllVectorReadLocks(vectors);
+        }
     }
 
     public int length() {
         // Done: return number of stored vectors
-        return vectors.length;
+        try {
+            acquireAllVectorReadLocks(vectors);
+            return vectors.length;
+        } 
+        finally {
+            releaseAllVectorReadLocks(vectors);
+        }
     }
 
     public VectorOrientation getOrientation() {
         // Done: return orientation
-        if(vectors == null || vectors[0]==null)
-            throw new IllegalStateException("Matrix is undefined");
-        return vectors[0].getOrientation();
+        try {
+            acquireAllVectorReadLocks(vectors);
+            if(vectors == null || vectors[0]==null)
+                throw new IllegalStateException("Matrix is undefined");
+            return vectors[0].getOrientation();
+        } 
+        finally {
+            releaseAllVectorReadLocks(vectors);
+        }
     }
 
     private void acquireAllVectorReadLocks(SharedVector[] vecs) {
