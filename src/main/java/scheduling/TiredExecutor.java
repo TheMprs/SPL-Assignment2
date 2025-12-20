@@ -10,7 +10,7 @@ public class TiredExecutor {
     private final AtomicInteger inFlight = new AtomicInteger(0);
 
     public TiredExecutor(int numThreads) {
-        // TODO
+        // Done
         workers = new TiredThread[numThreads];
         for (int i = 0; i < numThreads; i++) {
             workers[i] = new TiredThread(i, 0.5+ Math.random());
@@ -21,7 +21,7 @@ public class TiredExecutor {
     }
 
         public void submit(Runnable task) {
-            // TODO
+            // Done
             try{
                 inFlight.incrementAndGet();
                 TiredThread curWorker = idleMinHeap.take();
@@ -50,8 +50,22 @@ public class TiredExecutor {
         }
 
     public void submitAll(Iterable<Runnable> tasks) {
-        // TODO: submit tasks one by one and wait until all finish
-        try
+        // Done: submit tasks one by one and wait until all finish
+        for (Runnable task : tasks){
+            submit(task);
+        }
+        synchronized (inFlight){
+            try{
+                //We use while and not if to avoid "false alaram" wakeups
+                while(inFlight.get() > 0){
+                     inFlight.wait();
+                }    
+            }
+            catch(InterruptedException exception){
+                Thread.currentThread().interrupt();
+            }
+            
+        }
     }
 
     public void shutdown() throws InterruptedException {
@@ -63,10 +77,10 @@ public class TiredExecutor {
     }
 
     public synchronized String getWorkerReport() {
-        // TODO: return readable statistics for each worker
+        // Done: return readable statistics for each worker
         String str ="";
         for (TiredThread worker : workers) {
-            str += "Worker "+ worker.getId() +" Work: "+ worker.getTimeUsed() + 
+            str += "Worker "+ worker.threadId() +" Work: "+ worker.getTimeUsed() + 
             " Idle: "+ worker.getTimeIdle() + "\n";
         }
         return str;
