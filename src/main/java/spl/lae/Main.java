@@ -32,5 +32,12 @@ public class Main {
 			OutputWriter.write(e.getMessage(), outputFilePath);
 			return;
 		}
+
+		boolean testing = false;
+		// Print worker report if in testing mode
+		if(testing) {
+			System.out.println("Worker report");
+			System.out.println(engine.getWorkerReport());
+		}
 	}
 }

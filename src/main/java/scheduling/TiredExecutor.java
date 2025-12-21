@@ -80,8 +80,8 @@ public class TiredExecutor {
         // Done: return readable statistics for each worker
         String str ="";
         for (TiredThread worker : workers) {
-            str += "Worker "+ worker.threadId() +" Work: "+ worker.getTimeUsed() + 
-            " Idle: "+ worker.getTimeIdle() + "\n";
+            str += "Worker "+ worker.getWorkerId() +" Work: "+ worker.getTimeUsed() + 
+            " Idle: "+ worker.getTimeIdle() + " Fatigue: "+ worker.getFatigue() +"\n";
         }
         return str;
     }
