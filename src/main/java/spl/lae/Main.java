@@ -8,17 +8,17 @@ import parser.*;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
-        // TODO: main
+        // Done: main
 		if(args.length < 1) {
 			System.err.println("No path to input JSON file provided.");
 			return;
 		}
 
 		// Parse input arguments
-		String inputFilePath = args[0];
-		String outputFilePath = args[1];
-		int numThreads = Integer.parseInt(args[2]);
-
+		int numThreads = Integer.parseInt(args[0]);
+		String inputFilePath = args[1];
+		String outputFilePath = args[2];
+		
 		// Init Linear Algebra Engine and Input Parser
 		LinearAlgebraEngine engine = new LinearAlgebraEngine(numThreads);
 		InputParser parser = new InputParser();
@@ -33,7 +33,7 @@ public class Main {
 			return;
 		}
 
-		boolean testing = false;
+		boolean testing = true;
 		// Print worker report if in testing mode
 		if(testing) {
 			System.out.println("Worker report");
