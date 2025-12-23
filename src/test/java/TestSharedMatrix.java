@@ -1,4 +1,6 @@
-
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Vector;
 
@@ -7,27 +9,10 @@ import memory.SharedVector;
 import memory.VectorOrientation;
 
 public class TestSharedMatrix {
-    public static void main(String[] args) {
-        System.out.println(" --- TESTING SHARED MATRIX FUNCTIONS ---");
-        
+
+    @Test public void testMatrixRowMajorLoad() {
         System.out.println("\n-- Testing Matrix Row Major Load --");
-        testMatrixRowMajorLoad();
 
-        System.out.println("\n-- Testing Matrix Column Major Load --");
-        testMatrixColumnMajorLoad();
-        
-        System.out.println("\n-- Testing Matrix Row Major Read --");
-        testMatrixRowMajorRead();
-        
-        System.out.println("\n-- Testing Matrix Stats --");
-        testMatrixStats();
-
-        TestUtils.summary();
-        
-        System.out.println(" --- END OF SHARED MATRIX TESTING ---");
-    }
-
-    public static void testMatrixRowMajorLoad() {
         double[][] table = { {1,2}, {3,4} };
         double[][] tinyTable = {{4.0}};
 
@@ -48,7 +33,9 @@ public class TestSharedMatrix {
         System.out.println(matrix.get(0));    
     }
     
-    public static void testMatrixColumnMajorLoad() {
+    @Test public void testMatrixColumnMajorLoad() {
+        System.out.println("\n-- Testing Matrix Column Major Load --");
+
         double[][] table = { {1,2}, {3,4} };
         SharedMatrix matrix = new SharedMatrix(); 
         matrix.loadColumnMajor(table);
@@ -63,7 +50,9 @@ public class TestSharedMatrix {
         System.out.println(matrix.get(0));
     }
     
-    public static void testMatrixRowMajorRead() {
+    @Test public void testMatrixRowMajorRead() {
+        System.out.println("\n-- Testing Matrix Row Major Read --");
+
         double[][] table = { {1,2}, {3,4} };
         double[][] line = { {1,2,3} };
 
@@ -127,7 +116,9 @@ public class TestSharedMatrix {
         }
     }
 
-    public static void testMatrixStats(){
+    @Test public void testMatrixStats(){
+        System.out.println("\n-- Testing Matrix Stats --");
+
         double[][] table = {
             {1.0, 2.0, 3.0},
             {4.0, 5.0, 6.0},

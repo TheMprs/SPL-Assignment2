@@ -1,22 +1,13 @@
-
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import memory.SharedVector;
 import memory.VectorOrientation;
 
 public class TestVector {
-    public static void main(String[] args){
-        System.out.println(" --- TESTING SHARED VECTOR FUNCTIONS ---");
-        testVectorCreation();
-        testVectorAdd();
-        testVectorStatistics();
-        testVectorNegate();
+    @Test public void testVectorCreation(){
+        System.out.println(" \n-- Testing Vector Creation --");
 
-        TestUtils.summary();
-        System.out.println(" --- END OF SHARED VECTOR TESTING ---");
-
-    }
-
-    public static void testVectorCreation(){
         double[] arr ={1.0,2.0,3.0};
         SharedVector testVector = new SharedVector(arr, VectorOrientation.ROW_MAJOR); 
         
@@ -30,7 +21,9 @@ public class TestVector {
         TestUtils.checkObject("Vector Deep Copy", testVector.get(0), 1.0);
     }
     
-    public static void testVectorStatistics(){
+    @Test public void testVectorStatistics(){
+        System.out.println("\n-- Testing Vector Statistics --");
+
         double[] arr ={1.0,2.0,3.0};
         SharedVector testVector = new SharedVector(arr, VectorOrientation.ROW_MAJOR);
         
@@ -45,7 +38,9 @@ public class TestVector {
         TestUtils.checkObject("Vector Orientation", testVector.getOrientation(), VectorOrientation.ROW_MAJOR);
     }
     
-    public static void testVectorAdd(){
+    @Test public void testVectorAdd(){
+        System.out.println("\n-- Testing Vector Addition --");
+
         double[] arr1 ={1.0,2.0,3.0};
         double[] arr2 ={4.0,5.0,6.0};
         double[] arrsum1 = {5.0,7.0,9.0};
@@ -74,7 +69,9 @@ public class TestVector {
         }
     }
 
-    public static void testVectorNegate(){
+    @Test public void testVectorNegate(){
+        System.out.println("\n-- Testing Vector Negation --");
+
         double[] arr1 ={1.0,2.0,3.0};
         double[] arr1neg ={-1.0,-2.0,-3.0};
         double[] arr2 ={0.0,0.0};
