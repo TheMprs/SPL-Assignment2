@@ -10,8 +10,8 @@ public class SharedVector {
 
     public SharedVector(double[] vector, VectorOrientation orientation) {
         // Done: store vector data and its orientation
-        if (vector == null){throw new NullPointerException("Input vector is null");}
-        if (orientation == null){throw new NullPointerException("Input orientation is null");}
+        if (vector == null){throw new IllegalArgumentException("Input vector is null");}
+        if (orientation == null){throw new IllegalArgumentException("Input orientation is null");}
         
         this.orientation = orientation;
         this.vector = new double[vector.length];
@@ -83,8 +83,7 @@ public class SharedVector {
         // Done: transpose vector
         
         writeLock();
-        orientation = orientation == VectorOrientation.ROW_MAJOR ? VectorOrientation.COLUMN_MAJOR 
-                                        : VectorOrientation.ROW_MAJOR;
+        orientation = (orientation == VectorOrientation.ROW_MAJOR) ? VectorOrientation.COLUMN_MAJOR : VectorOrientation.ROW_MAJOR;
         writeUnlock();
     }
 
@@ -142,12 +141,17 @@ public class SharedVector {
         //Done: compute row-vector × matrix 
         try{
             writeLock();
+            //validate orientations and dimensions
             if(this.orientation != VectorOrientation.ROW_MAJOR){
-            throw new UnsupportedOperationException("vecMatMul not supported for non-row major vectors");
+                throw new UnsupportedOperationException("vecMatMul not supported for non-row major vectors");
             }
             if(matrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){
                 throw new UnsupportedOperationException("vecMatMul not supported for non-column major matrices");
             }
+            if(this.length() != matrix.length()){
+                throw new UnsupportedOperationException("Vector and Matrix dimensions do not match for multiplication");
+            }
+
             double[] result = new double[matrix.length()];
             for (int i = 0; i < result.length; i++) {
                 result[i] = dot(matrix.get(i));

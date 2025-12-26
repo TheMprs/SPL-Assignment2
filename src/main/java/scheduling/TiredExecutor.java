@@ -17,37 +17,35 @@ public class TiredExecutor {
             workers[i].start();
             idleMinHeap.add(workers[i]);
         }
-       
     }
 
-        public void submit(Runnable task) {
-            // Done
-            try{
-                inFlight.incrementAndGet();
-                TiredThread curWorker = idleMinHeap.take();
-                // Wrap the task to update worker status and inFlight counter
-                Runnable wrappedTask = () -> {
-                    try{
-                        task.run(); // Execute the original task
-                    }
-                    finally{
-                        idleMinHeap.add(curWorker); // Mark worker as idle again
-                        if(inFlight.decrementAndGet() == 0){ //it was the last task
+    public void submit(Runnable task) {
+        // Done
+        try{
+            inFlight.incrementAndGet();
+            TiredThread curWorker = idleMinHeap.take();
+            // Wrap the task to update worker status and inFlight counter
+            Runnable wrappedTask = () -> {
+                try{
+                    task.run(); // Execute the original task
+                }
+                finally{
+                    idleMinHeap.add(curWorker); // Mark worker as idle again
+                    if(inFlight.decrementAndGet() == 0){ //it was the last task
                         synchronized (inFlight) {
                             inFlight.notifyAll();
                         }
                     }
-                    
-                    }
-                };
-                curWorker.newTask(wrappedTask);
-            }
-            catch (InterruptedException e){ //The task was interrupted so we revert the inFlight increment
-                inFlight.decrementAndGet();
-                Thread.currentThread().interrupt();
-            }
-        
+                }
+            };
+            curWorker.newTask(wrappedTask);
         }
+        catch (InterruptedException e){ //The task was interrupted so we revert the inFlight increment
+            inFlight.decrementAndGet();
+            Thread.currentThread().interrupt();
+        }
+    
+    }
 
     public void submitAll(Iterable<Runnable> tasks) {
         // Done: submit tasks one by one and wait until all finish
