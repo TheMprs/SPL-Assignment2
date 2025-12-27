@@ -27,14 +27,18 @@ public class LinearAlgebraEngine {
         if (computationRoot == null){
             throw new NullPointerException("Computation tree root is null");
         }
-        while(computationRoot.getNodeType() != ComputationNodeType.MATRIX){
-            loadAndCompute(computationRoot);
-        }
+        //we put a try-finally to ensure executor shutdown in case of exceptions
         try{
-            executor.shutdown();
+            while(computationRoot.getNodeType() != ComputationNodeType.MATRIX){
+                loadAndCompute(computationRoot);
+            }
         }
-        catch (InterruptedException e){
-            Thread.currentThread().interrupt();
+        finally{
+            try{
+                executor.shutdown();
+            } catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+            }
         }
         return computationRoot;
     }

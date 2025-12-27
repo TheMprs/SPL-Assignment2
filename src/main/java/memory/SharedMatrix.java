@@ -48,6 +48,7 @@ public class SharedMatrix {
                 // Use .append to ADD to the string, don't replace it!
                 sb.append(vectors[i].toString()).append("\n"); 
             }
+
             return sb.toString();    
         } 
         finally {
@@ -63,6 +64,13 @@ public class SharedMatrix {
         try {
             if(matrix==null || matrix.length==0 || matrix[0].length==0) 
                 throw new IllegalArgumentException("Input matrix cannot be null or empty");
+            
+            int validLen = matrix[0].length;
+            for(int i=1;i<matrix.length;i++){
+                if(matrix[i].length != validLen)
+                    throw new IllegalArgumentException("Input matrix rows have inconsistent lengths");
+            }
+            
             int rows = matrix.length;
             SharedVector[] newVectors = new SharedVector[rows];
 
@@ -86,7 +94,15 @@ public class SharedMatrix {
         acquireAllVectorWriteLocks(vectors);
     
         try{
-            if(matrix==null) throw new IllegalArgumentException("Input matrix cannot be null");
+            if(matrix==null || matrix.length==0 || matrix[0].length==0) 
+                throw new IllegalArgumentException("Input matrix cannot be null or empty");
+            
+            int validLen = matrix[0].length;
+            for(int i=1;i<matrix.length;i++){
+                if(matrix[i].length != validLen)
+                    throw new IllegalArgumentException("Input matrix rows have inconsistent lengths");
+            }
+            
             int columns = matrix[0].length;
             SharedVector[] newVectors = new SharedVector[columns];
 
@@ -109,6 +125,10 @@ public class SharedMatrix {
         acquireAllVectorReadLocks(vectors);
         try {
             double[][] matrixContents;
+            
+            if(vectors == null || vectors.length==0 || vectors[0]==null || vectors[0].length()==0)
+                throw new IllegalStateException("Matrix is undefined");
+
             //check orientation
             if(getOrientation() == VectorOrientation.ROW_MAJOR){ //row major
                 matrixContents = new double[length()][vectors[0].length()];
@@ -140,7 +160,7 @@ public class SharedMatrix {
 
         try {    
             if(index<0 || index >= vectors.length)
-                throw new IndexOutOfBoundsException("index out of bounds");
+                throw new IndexOutOfBoundsException("index "+index+" out of bounds for length "+vectors.length);
             
             return this.vectors[index];
     
@@ -167,7 +187,7 @@ public class SharedMatrix {
         acquireAllVectorReadLocks(vectors);
         
         try {
-            if(vectors == null || vectors[0]==null || vectors.length==0 )
+            if(vectors == null || vectors.length==0 || vectors[0]==null || vectors[0].length()==0)
                 throw new IllegalStateException("Matrix is undefined");
             return vectors[0].getOrientation();
         } 

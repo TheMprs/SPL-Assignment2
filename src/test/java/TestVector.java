@@ -1,6 +1,9 @@
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+
 import memory.SharedMatrix;
 import memory.SharedVector;
 import memory.VectorOrientation;
@@ -631,11 +634,11 @@ public class TestVector {
         }
     }
 
-    @Test public void testVectorDotProduct(){
-        System.out.println("\n-- Testing Vector Dot Product --");
-
+    @Nested
+    @DisplayName("Testing Vector Dot Product")
+    class testVectorDotProduct{
         //test simple dot product
-        {
+        @Test public void testVectorDotProductSimple(){
             double[] arr1 ={1.0,2.0,3.0};
             double[] arr2 ={4.0,5.0,6.0};
             
@@ -644,10 +647,10 @@ public class TestVector {
             
             double dotProduct = vector1.dot(vector2);
             
-            TestUtils.checkObject("Simple Dot Product", dotProduct, 32.0);
+            assertEquals(32.0, dotProduct,"Simple Dot Product");
         }
         //test dot product with negatives
-        {
+        @Test public void testVectorDotProductWithNegatives(){
             double[] arr1 ={1.0,-2.0,3.0};
             double[] arr2 ={-4.0,5.0,-6.0};
             
@@ -656,25 +659,22 @@ public class TestVector {
             
             double dotProduct = vector1.dot(vector2);
             
-            TestUtils.checkObject("Dot Product with Negatives", dotProduct, -12.0);
+            assertEquals(-32.0, dotProduct,"Dot Product with Negatives");
         }
         //test dot product with dimension mismatch
-        {
+        @Test public void testVectorDotProductDimensionMismatch(){
             double[] arr3 = {1};
             double[] arr4 = {1,2};
             
             SharedVector vector3 = new SharedVector(arr3, VectorOrientation.ROW_MAJOR);
             SharedVector vector4 = new SharedVector(arr4, VectorOrientation.COLUMN_MAJOR);
 
-            try {
+            assertThrows(IllegalArgumentException.class, () -> {
                 double dotProduct = vector3.dot(vector4);
-                System.out.println("[FAIL] Dimension Mismatch: Allowed dot product of different lengths");
-            } catch (Exception e) {
-                System.out.println("[PASS] Dimension Mismatch: Caught error during dot product");
-            }
+            }, "Expected exception during Dot Product with Dimension Mismatch");    
         }
         //test dot product during readlock
-        {
+        @Test public void testVectorDotProductDuringReadLock(){
             double[] arr1 ={1.0,2.0,3.0};
             double[] arr2 ={4.0,5.0,6.0};
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
@@ -682,18 +682,16 @@ public class TestVector {
             
             vector1.readLock();
             try{
-                double dotProduct = vector1.dot(vector2);
-                System.out.println("[FAIL] Dot Product during ReadLock: No exception thrown");
-            }
-            catch (Exception e){
-                System.out.println("[PASS] Dot Product during ReadLock: Caught exception");
+                assertThrows(Exception.class, () -> {
+                    double dotProduct = vector1.dot(vector2);
+                }, "Dot Product expected exception during ReadLock");
             }
             finally{
                 vector1.readUnlock();
             }
         }
         //test dot product during writelock
-        {
+        @Test public void testVectorDotProductDuringWriteLock(){
             double[] arr1 ={1.0,2.0,3.0};
             double[] arr2 ={4.0,5.0,6.0};
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
@@ -701,81 +699,61 @@ public class TestVector {
             
             vector1.writeLock();
             try{
-                double dotProduct = vector1.dot(vector2);
-                System.out.println("[FAIL] Dot Product during WriteLock: No exception thrown");
-            }
-            catch (Exception e){
-                System.out.println("[PASS] Dot Product during WriteLock: Caught exception");
+                assertThrows(Exception.class, () -> {
+                    double dotProduct = vector1.dot(vector2);
+                }, "Dot Product expected exception during WriteLock");
             }
             finally{
                 vector1.writeUnlock();
             }
         }
         //test dot product with null vector
-        {
+        @Test public void testVectorDotProductWithNullVector(){
             double[] arr1 ={1.0,2.0,3.0};
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedVector nullVector = null;
-            
-            try{
+            assertThrows(NullPointerException.class, () -> {
                 double dotProduct = vector1.dot(nullVector);
-                System.out.println("[FAIL] Dot Product with Null Vector: No exception thrown");
-            }
-            catch (NullPointerException e){
-                System.out.println("[PASS] Dot Product with Null Vector: Caught exception");
-            }
+            }, "Expected exception during Dot Product with Null Vector");    
         }
         //test dot product to null vector
-        {
+        @Test public void testVectorDotProductToNullVector(){
             double[] arr1 ={1.0,2.0,3.0};
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedVector nullVector = null;
             
-            try{
+            assertThrows(NullPointerException.class, () -> {
                 double dotProduct = nullVector.dot(vector1);
-                System.out.println("[FAIL] Null Vector Dot Product: No exception thrown");
-            }
-            catch (NullPointerException e){
-                System.out.println("[PASS] Null Vector Dot Product: Caught exception");
-            }
+            }, "Expected exception during Dot Product to Null Vector");
         }
         //test dot product with same orientation
-        {
+        @Test public void testVectorDotProductSameOrientation(){
             double[] arr1 ={1.0,2.0,3.0};
             double[] arr2 ={4.0,5.0,6.0};
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedVector vector2 = new SharedVector(arr2, VectorOrientation.ROW_MAJOR);
             
-            try{
+            assertThrows(IllegalArgumentException.class, () -> {
                 double dotProduct = vector1.dot(vector2);
-                System.out.println("[FAIL] Dot Product with Same Orientations: No exception thrown");
-            }
-            catch (IllegalArgumentException e){
-                System.out.println("[PASS] Dot Product with Same Orientations: Caught exception");
-            }
+            }, "Expected exception during Dot Product with Same Orientation");
         }
         //test dot product with reversed orientations
-        {
+        @Test public void testVectorDotProductReversedOrientations(){
             double[] arr1 ={1.0,2.0,3.0};
             double[] arr2 ={4.0,5.0,6.0};
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.COLUMN_MAJOR);
             SharedVector vector2 = new SharedVector(arr2, VectorOrientation.ROW_MAJOR);
-            
-            try{
+            assertThrows(IllegalArgumentException.class, () -> {
                 double dotProduct = vector1.dot(vector2);
-                System.out.println("[FAIL] Dot Product with Reversed Orientations: No exception thrown");
-            }
-            catch (IllegalArgumentException e){
-                System.out.println("[PASS] Dot Product with Reversed Orientations: Caught exception");
-            }
+            }, "Expected exception during Dot Product with Reversed Orientations");
         }
     }
 
-    @Test public void testVecMatMultiplication(){
-        System.out.println("\n-- Testing Vector-Matrix Multiplication --");
-        
+    @Nested
+    @DisplayName("Testing Vector-Scalar Multiplication")
+    class testVectorScalarMultiplication{
         //test valid multiplication
-        {
+        @Test public void testVectorScalarMultiplicationValid(){
             double[] arr1 ={1.0,2.0,3.0};
             double[][] table = {
                 {4.0, 5.0, 6.0},
@@ -788,14 +766,14 @@ public class TestVector {
             SharedMatrix matrix = new SharedMatrix();
             matrix.loadColumnMajor(table);
 
-            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.COLUMN_MAJOR);
+            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.ROW_MAJOR);
             
             vector1.vecMatMul(matrix);
             
-            TestUtils.checkObject("Valid Vector-Matrix Multiplication", vector1, expectedVector);
+            assertEquals(expectedVector, vector1, "Valid Vector-Matrix Multiplication");
         }
         //test multiplication with dimension mismatch
-        {
+        @Test public void testVectorScalarMultiplicationDimensionMismatch() {
             double[] arr1 ={1.0,2.0};
             double[][] table = {
                 {4.0, 5.0, 6.0},
@@ -805,16 +783,12 @@ public class TestVector {
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedMatrix matrix = new SharedMatrix(table);
             
-            try{
+            assertThrows(IllegalArgumentException.class, () -> {
                 vector1.vecMatMul(matrix);
-                System.out.println("[FAIL] Dimension Mismatch: No exception thrown");
-            }
-            catch (UnsupportedOperationException e){
-                System.out.println("[PASS] Dimension Mismatch: Caught exception");
-            }
+            }, "Expected exception during Vector-Matrix Multiplication with Dimension Mismatch");
         }
         //test wrong vector orientation
-        {
+        @Test public void testVectorScalarMultiplicationWrongOrientation(){
             double[] arr1 ={1.0,2.0,3.0};
             double[][] table = {
                 {1.0, 2.0, 3.0},
@@ -825,16 +799,12 @@ public class TestVector {
             SharedMatrix matrix = new SharedMatrix();
             matrix.loadColumnMajor(table);
             
-            try{
+            assertThrows(UnsupportedOperationException.class, () -> {
                 vector1.vecMatMul(matrix);
-                System.out.println("[FAIL] Vector-Matrix Multiplication with Wrong Orientation: No exception thrown");
-            }
-            catch (UnsupportedOperationException e){
-                System.out.println("[PASS] Vector-Matrix Multiplication with Wrong Orientation: Caught exception");
-            }
+            }, "Expected exception during Vector-Matrix Multiplication with Wrong Vector Orientation");
         }
         //test wrong matrix orientation
-        {
+        @Test public void testVectorScalarMultiplicationWrongMatrixOrientation(){
             double[] arr1 ={1.0,2.0,3.0};
             double[][] table = {
                 {1.0, 2.0, 3.0},
@@ -844,16 +814,12 @@ public class TestVector {
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedMatrix matrix = new SharedMatrix(table); //row-major
             
-            try{
+            assertThrows(UnsupportedOperationException.class, () -> {
                 vector1.vecMatMul(matrix);
-                System.out.println("[FAIL] Vector-Matrix Multiplication with Wrong Matrix Orientation: No exception thrown");
-            }
-            catch (UnsupportedOperationException e){
-                System.out.println("[PASS] Vector-Matrix Multiplication with Wrong Matrix Orientation: Caught exception");
-            }
+            }, "Expected exception during Vector-Matrix Multiplication with Wrong Matrix Orientation");    
         }
         //test multiplication during readlock
-        {
+        @Test public void testVectorScalarMultiplicationDuringReadLock(){
             double[] arr1 ={1.0,2.0,3.0};
             double[][] table = {
                 {4.0, 5.0, 6.0},
@@ -875,17 +841,15 @@ public class TestVector {
             catch(InterruptedException e){
                 t.interrupt();
             }
-            if(t.isAlive()){
-                System.out.println("[PASS] Vector-Matrix Multiplication during ReadLock: Multiplication is blocked as expected");
+            try{
+                assertTrue(t.isAlive(), "Vector-Matrix Multiplication during ReadLock: Multiplication is blocked as expected");
+            } finally{
                 t.interrupt(); // Clean up the thread
+                vector1.readUnlock();
             }
-            else{
-                System.out.println("[FAIL] Vector-Matrix Multiplication during ReadLock: Multiplication proceeded unexpectedly");
-            }
-            vector1.readUnlock();
         }
         //test multiplication during writelock
-        {
+        @Test public void testVectorScalarMultiplicationDuringWriteLock(){
             double[] arr1 ={1.0,2.0,3.0};
             double[][] table = {
                 {4.0, 5.0, 6.0},
@@ -897,14 +861,12 @@ public class TestVector {
             matrix.loadColumnMajor(table);
             
             vector1.writeLock();
-            try{
-                vector1.vecMatMul(matrix);
-                System.out.println("[FAIL] Vector-Matrix Multiplication during WriteLock: No exception thrown");
-            }
-            catch (Exception e){
-                System.out.println("[PASS] Vector-Matrix Multiplication during WriteLock: Caught exception");
-            }
-            finally{
+            
+            try {
+                assertThrows(Exception.class, () -> {
+                    vector1.vecMatMul(matrix);
+                }, "Vector-Matrix Multiplication during WriteLock: Expected exception thrown");
+            } finally {
                 vector1.writeUnlock();
             }
         }
@@ -971,7 +933,7 @@ public class TestVector {
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedMatrix zeroMatrix = new SharedMatrix();
             zeroMatrix.loadColumnMajor(zeroTable);
-            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.COLUMN_MAJOR);
+            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.ROW_MAJOR);
             
             vector1.vecMatMul(zeroMatrix);
             
@@ -979,18 +941,18 @@ public class TestVector {
         }
         //test multiplication resulting in negative values
         {
-            double[] arr1 ={1.0,-2.0,3.0};
+            double[] arr1 ={-1.0,-2.0,-3.0};
             double[][] table = {
                 {4.0, 5.0, 6.0},
                 {7.0, 8.0, 9.0},
                 {10.0,11.0,12.0}
             };
-            double[] expectedArr ={48.0,54.0,60.0};
+            double[] expectedArr ={-48.0, -54.0, -60.0};
             
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedMatrix matrix = new SharedMatrix();
             matrix.loadColumnMajor(table);
-            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.COLUMN_MAJOR);
+            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.ROW_MAJOR);
             
             vector1.vecMatMul(matrix);
             
@@ -998,13 +960,13 @@ public class TestVector {
         }
         //test multiplication with non-square matrix
         {
-            double[] arr1 ={1.0,2.0};
+            double[] arr1 ={1.0,2.0, 3.0};
             double[][] table = {
                 {4.0, 5.0},
                 {6.0, 7.0},
                 {8.0, 9.0}
             };
-            double[] expectedArr ={18.0,22.0,26.0};
+            double[] expectedArr ={40.0, 46.0};
             
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedMatrix matrix = new SharedMatrix();
@@ -1026,7 +988,7 @@ public class TestVector {
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedMatrix matrix = new SharedMatrix();
             matrix.loadColumnMajor(table);
-            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.COLUMN_MAJOR);
+            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.ROW_MAJOR);
             
             vector1.vecMatMul(matrix);
             
@@ -1061,7 +1023,7 @@ public class TestVector {
             SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
             SharedMatrix matrix = new SharedMatrix();
             matrix.loadColumnMajor(table);
-            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.COLUMN_MAJOR);
+            SharedVector expectedVector = new SharedVector(expectedArr, VectorOrientation.ROW_MAJOR);
             
             vector1.vecMatMul(matrix);
             

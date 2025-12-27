@@ -12,7 +12,8 @@ public class SharedVector {
         // Done: store vector data and its orientation
         if (vector == null){throw new IllegalArgumentException("Input vector is null");}
         if (orientation == null){throw new IllegalArgumentException("Input orientation is null");}
-        
+        if(vector.length == 0){throw new IllegalArgumentException("Input vector has zero length");}
+
         this.orientation = orientation;
         this.vector = new double[vector.length];
 
@@ -28,7 +29,7 @@ public class SharedVector {
         readLock();
         try{
             if (index < 0 || index >= vector.length){
-            throw new IndexOutOfBoundsException("Iligal index");
+            throw new IndexOutOfBoundsException("Illegal index");
             }
             return vector[index];
         } finally {
@@ -93,6 +94,7 @@ public class SharedVector {
             writeLock();
             if(other == null){throw new NullPointerException("Other vector is null");}
             if(vector.length != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
+            if(orientation != other.getOrientation()){throw new IllegalArgumentException("other vector has different orientation from this vector");}
 
             //Summing the result into this
             for (int i = 0; i < vector.length; i++) {
@@ -124,6 +126,10 @@ public class SharedVector {
             readLock();
             if(other == null){throw new NullPointerException("Other vector is null");}
             if(vector.length != other.length()){throw new IllegalArgumentException("other vector has different length from this vector");}
+            if(this.orientation != VectorOrientation.ROW_MAJOR || other.getOrientation() != VectorOrientation.COLUMN_MAJOR){
+                throw new UnsupportedOperationException("Dot product only supported for row · column vectors");
+            }
+
             double sum = 0;
             for (int i = 0; i < vector.length; i++) {
                 // Using get() per iteration incurs overhead but prevents deadlocks
@@ -142,15 +148,11 @@ public class SharedVector {
         try{
             writeLock();
             //validate orientations and dimensions
-            if(this.orientation != VectorOrientation.ROW_MAJOR){
-                throw new UnsupportedOperationException("vecMatMul not supported for non-row major vectors");
-            }
-            if(matrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){
-                throw new UnsupportedOperationException("vecMatMul not supported for non-column major matrices");
-            }
-            if(this.length() != matrix.length()){
-                throw new UnsupportedOperationException("Vector and Matrix dimensions do not match for multiplication");
-            }
+            if(matrix == null){ throw new NullPointerException("Input matrix is null");}
+            if(matrix.length() == 0 || matrix.get(0).length() == 0){ throw new UnsupportedOperationException("Input matrix has zero length");}
+            if(this.orientation != VectorOrientation.ROW_MAJOR){ throw new UnsupportedOperationException("vecMatMul not supported for non-row major vectors");}
+            if(matrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){ throw new UnsupportedOperationException("vecMatMul not supported for non-column major matrices");}
+            if(this.length() != matrix.get(0).length()){ throw new UnsupportedOperationException("Vector and Matrix dimensions do not match for multiplication");}
 
             double[] result = new double[matrix.length()];
             for (int i = 0; i < result.length; i++) {
