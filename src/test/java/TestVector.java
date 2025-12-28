@@ -575,6 +575,30 @@ public class TestVector {
                 double dotProduct = vector1.dot(vector2);
             }, "Expected exception during Dot Product with Reversed Orientations");
         }
+        // Test dot product with zeros
+        @Test public void testVectorDotProductWithZeros() {
+            double[] arr1 = {0.0, 0.0, 0.0};
+            double[] arr2 = {4.0, 5.0, 6.0};
+            
+            SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
+            SharedVector vector2 = new SharedVector(arr2, VectorOrientation.COLUMN_MAJOR);
+            
+            double dotProduct = vector1.dot(vector2);
+            
+            assertEquals(0.0, dotProduct, "Dot Product with Zero Vector");
+        }
+        // Test dot product of single element vectors
+        @Test public void testVectorDotProductSingleElement() {
+            double[] arr1 = {5.0};
+            double[] arr2 = {3.0};
+            
+            SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
+            SharedVector vector2 = new SharedVector(arr2, VectorOrientation.COLUMN_MAJOR);
+            
+            double dotProduct = vector1.dot(vector2);
+            
+            assertEquals(15.0, dotProduct, "Dot Product Single Element");
+        }
     }
 
     @Nested
@@ -986,5 +1010,81 @@ public class TestVector {
         }
     }
 
+    @Nested
+    @DisplayName("Vector Equals Tests")
+    class vectorEqualsTests {
+        // Test equals with same vector
+        @Test public void testEqualsSameVector() {
+            double[] arr = {1.0, 2.0, 3.0};
+            SharedVector vector = new SharedVector(arr, VectorOrientation.ROW_MAJOR);
+            
+            assertEquals(vector, vector, "Vector should equal itself");
+        }        
+        // Test equals with identical vectors
+        @Test public void testEqualsIdenticalVectors() {
+            double[] arr1 = {1.0, 2.0, 3.0};
+            double[] arr2 = {1.0, 2.0, 3.0};
+            SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
+            SharedVector vector2 = new SharedVector(arr2, VectorOrientation.ROW_MAJOR);
+            
+            assertEquals(vector1, vector2, "Identical vectors should be equal");
+        }        
+        // Test equals with different values
+        @Test public void testEqualsWithDifferentValues() {
+            double[] arr1 = {1.0, 2.0, 3.0};
+            double[] arr2 = {4.0, 5.0, 6.0};
+            SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
+            SharedVector vector2 = new SharedVector(arr2, VectorOrientation.ROW_MAJOR);
+            
+            assertNotEquals(vector1, vector2, "Vectors with different values should not be equal");
+        }        
+        // Test equals with different orientations
+        @Test public void testEqualsWithDifferentOrientations() {
+            double[] arr1 = {1.0, 2.0, 3.0};
+            double[] arr2 = {1.0, 2.0, 3.0};
+            SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
+            SharedVector vector2 = new SharedVector(arr2, VectorOrientation.COLUMN_MAJOR);
+            
+            assertNotEquals(vector1, vector2, "Vectors with different orientations should not be equal");
+        }        
+        // Test equals with null
+        @Test public void testEqualsWithNull() {
+            double[] arr = {1.0, 2.0, 3.0};
+            SharedVector vector = new SharedVector(arr, VectorOrientation.ROW_MAJOR);
+            
+            assertNotEquals(null, vector, "Vector should not equal null");
+        }
+        // Test equals with different lengths
+        @Test public void testEqualsWithDifferentLengths() {
+            double[] arr1 = {1.0, 2.0, 3.0};
+            double[] arr2 = {1.0, 2.0};
+            SharedVector vector1 = new SharedVector(arr1, VectorOrientation.ROW_MAJOR);
+            SharedVector vector2 = new SharedVector(arr2, VectorOrientation.ROW_MAJOR);
+            
+            assertNotEquals(vector1, vector2, "Vectors with different lengths should not be equal");
+        }
+    }
 
+    @Nested
+    @DisplayName("Vector ToString Tests")
+    class vectorToStringTests {
+        // Test toString for row-major vector
+        @Test public void testToStringRowMajor() {
+            double[] arr = {1.0, 2.0, 3.0};
+            SharedVector vector = new SharedVector(arr, VectorOrientation.ROW_MAJOR);
+            
+            String result = vector.toString();
+            
+            assertEquals("[1.0 2.0 3.0]", result, "Row-major vector toString format");
+        }
+        // Test toString for column-major vector
+        @Test public void testToStringColumnMajor() {
+            double[] arr = {1.0, 2.0, 3.0};
+            SharedVector vector = new SharedVector(arr, VectorOrientation.COLUMN_MAJOR);
+            
+            String result = vector.toString();
+            
+            assertEquals("| 1.0 | 2.0 | 3.0 |", result, "Column-major vector toString format");
+        }
+    }
 }
