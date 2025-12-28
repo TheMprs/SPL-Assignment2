@@ -108,7 +108,14 @@ public class LinearAlgebraEngine {
 
     public List<Runnable> createMultiplyTasks() {
         // Done: return tasks that perform row × matrix multiplication
+        
+        if (leftMatrix == null || rightMatrix == null) {
+            throw new NullPointerException("Matrices cannot be null");
+        }
 
+        if (leftMatrix.length() == 0 || rightMatrix.length() == 0) {
+            throw new IllegalArgumentException("Matrices cannot be empty");
+        }
         //compare left's cols to right's rows
         if(leftMatrix.get(0).length() != rightMatrix.get(0).length()){
             throw new IllegalArgumentException("Matrices dimensions do not match for multiplication");
@@ -152,6 +159,12 @@ public class LinearAlgebraEngine {
 
     public List<Runnable> createTransposeTasks() {
         // Done: return tasks that transpose rows
+        if (leftMatrix == null) {
+        throw new NullPointerException("Matrix reference is null");
+        }
+        if (leftMatrix.length() == 0) {
+            throw new IllegalArgumentException("Matrix is empty");
+        }
         List<Runnable> tasks = new java.util.LinkedList<Runnable>();
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int index = i; //Capture index for lambda scope
