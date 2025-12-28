@@ -149,10 +149,10 @@ public class SharedVector {
             writeLock();
             //validate orientations and dimensions
             if(matrix == null){ throw new NullPointerException("Input matrix is null");}
-            if(matrix.length() == 0 || matrix.get(0).length() == 0){ throw new UnsupportedOperationException("Input matrix has zero length");}
+            if(matrix.length() == 0 || matrix.get(0).length() == 0){ throw new IllegalArgumentException("Input matrix has zero length");}
             if(this.orientation != VectorOrientation.ROW_MAJOR){ throw new UnsupportedOperationException("vecMatMul not supported for non-row major vectors");}
             if(matrix.getOrientation() != VectorOrientation.COLUMN_MAJOR){ throw new UnsupportedOperationException("vecMatMul not supported for non-column major matrices");}
-            if(this.length() != matrix.get(0).length()){ throw new UnsupportedOperationException("Vector and Matrix dimensions do not match for multiplication");}
+            if(this.length() != matrix.get(0).length()){ throw new IllegalArgumentException("Vector and Matrix dimensions do not match for multiplication");}
 
             double[] result = new double[matrix.length()];
             for (int i = 0; i < result.length; i++) {
