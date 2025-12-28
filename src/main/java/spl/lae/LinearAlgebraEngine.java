@@ -133,6 +133,12 @@ public class LinearAlgebraEngine {
 
     public List<Runnable> createNegateTasks() {
         // Done: return tasks that negate rows
+       if (leftMatrix == null) {
+        throw new NullPointerException("Matrix reference is null");
+        }
+        if (leftMatrix.length() == 0) {
+            throw new IllegalArgumentException("Matrix is empty");
+        }
         List<Runnable> tasks = new java.util.LinkedList<Runnable>();
         for (int i = 0; i < leftMatrix.length(); i++) {
             final int index = i; //Capture index for lambda scope
