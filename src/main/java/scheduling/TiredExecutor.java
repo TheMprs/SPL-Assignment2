@@ -24,12 +24,19 @@ public class TiredExecutor {
         try{
             inFlight.incrementAndGet();
             TiredThread curWorker = idleMinHeap.take();
+            
             // Wrap the task to update worker status and inFlight counter
             Runnable wrappedTask = () -> {
+                long startTime = System.nanoTime();
                 try{
                     task.run(); // Execute the original task
                 }
                 finally{
+                    // calculate job time locally to ensure 
+                    // fatigue is calculated correctly before reinsertion
+                    long jobDuration = System.nanoTime() -startTime;
+                    curWorker.addTimeUsed(jobDuration);
+
                     idleMinHeap.add(curWorker); // Mark worker as idle again
                     if(inFlight.decrementAndGet() == 0){ //it was the last task
                         synchronized (inFlight) {

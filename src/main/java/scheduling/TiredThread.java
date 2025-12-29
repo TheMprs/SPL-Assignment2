@@ -113,7 +113,10 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
                     }
                     finally {
                         // time used is (totalTimeUsed + (current time - job start time))
-                        timeUsed.addAndGet(System.nanoTime() - jobStartTime);
+                        //      removed time calculations inside thread to ensure time calculation correctness 
+                        //      using the lambda wrapping method 
+                        // timeUsed.addAndGet(System.nanoTime() - jobStartTime);
+                        
                         // time used is (current time - job time start + previous time used)
                         busy.set(false);        
                     }
@@ -135,5 +138,9 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
         if(o.getFatigue() < this.getFatigue()) return 1;
         else if(o.getFatigue() > this.getFatigue()) return -1;
         return 0;
+    }
+
+    public void addTimeUsed(long time){
+        this.timeUsed.addAndGet(time);
     }
 }
