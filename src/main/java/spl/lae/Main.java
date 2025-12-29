@@ -20,24 +20,26 @@ public class Main {
 		String outputFilePath = args[2];
 		
 		// Init Linear Algebra Engine and Input Parser
-		LinearAlgebraEngine engine = new LinearAlgebraEngine(numThreads);
 		InputParser parser = new InputParser();
-		
+		LinearAlgebraEngine engine;
 		try { 
-			ComputationNode node = parser.parse(inputFilePath);
+			ComputationNode node = parser.parse(inputFilePath);			
+			engine = new LinearAlgebraEngine(numThreads);
 			ComputationNode result =engine.run(node);
 			OutputWriter.write(result.getMatrix(), outputFilePath);
+			
+			boolean testing = true;
+			// Print worker report if in testing mode
+			if(testing) {
+				System.out.println("Worker report");
+				System.out.println(engine.getWorkerReport());
+			}
+		
 		}
 		catch (Exception e) {// Catch parsing exceptions
 			OutputWriter.write(e.getMessage(), outputFilePath);
 			return;
 		}
 
-		boolean testing = true;
-		// Print worker report if in testing mode
-		if(testing) {
-			System.out.println("Worker report");
-			System.out.println(engine.getWorkerReport());
-		}
 	}
 }
