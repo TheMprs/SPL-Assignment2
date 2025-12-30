@@ -56,7 +56,14 @@ public class TiredThread extends Thread implements Comparable<TiredThread> {
      * it throws IllegalStateException.
      */
     public void newTask(Runnable task) {
-        // TODO
+        // Done
+            if (!alive.get()) {
+            throw new IllegalStateException("Worker is shut down");
+        }
+        
+        if (task == null) {
+            throw new IllegalArgumentException("Task cannot be null");
+        }
         // the add operation is non-blocking, will throw exception if full
         handoff.add(task);
     }

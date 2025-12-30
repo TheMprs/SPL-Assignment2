@@ -155,6 +155,29 @@ public class TestTiredExecutor {
             fail("Test failed due to reflection error: " + e.getMessage());
         }
     }
+    
+    @Test
+    @DisplayName("Error detection and propagation")
+    public void testErrorPropagation() throws InterruptedException {
+        //Will be used to capture the error from the task for comparison
+        java.util.concurrent.atomic.AtomicReference<Throwable> caughtError = new java.util.concurrent.atomic.AtomicReference<>();
+
+        Runnable failingTask = () -> {
+            try {
+                throw new ArithmeticException("Matrix calculation failed");
+            } catch (Throwable t) {
+                caughtError.set(t); // Capture the error
+                throw t;
+            }
+        };
+
+        executor.submitAll(java.util.Collections.singletonList(failingTask));
+
+        //Verify that the error was captured and propagated
+        assertNotNull(caughtError.get(), "The calculation logic should be aware of the internal task failure.");
+        assertEquals("Matrix calculation failed", caughtError.get().getMessage(), "The original error message must be preserved.");
+    }
+
     /**
      * Mockup implementation for Runnable.
      * Used to verify task execution.
